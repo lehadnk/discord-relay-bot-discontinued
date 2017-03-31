@@ -2,6 +2,7 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
+
 client.on('message', msg => {
     var text = '**' + msg.member.displayName + '** [*' + msg.guild.name + '*]: \n' + msg.content;
     client.guilds.forEach(function (guild) {
@@ -13,4 +14,4 @@ client.on('message', msg => {
     });
 });
 
-client.login('Mjk3MzkyNTUyODA0MzUyMDAx.C8AH7g.MwcZ4xpQsejOYQn4nKE0QlfTzpc');
+client.login(process.env.BOT_TOKEN);
