@@ -2,6 +2,8 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 
+var http = require('http');
+http.createServer(function(req, res){}).listen(process.env.PORT || 6000);
 
 client.on('message', msg => {
     var text = '**' + msg.member.displayName + '** [*' + msg.guild.name + '*]: \n' + msg.content;
