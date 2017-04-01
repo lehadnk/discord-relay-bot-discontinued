@@ -21,16 +21,14 @@ client.on('message', msg => {
     var embed = new Discord.RichEmbed()
             .setAuthor(msg.member.displayName + '  [' + msg.guild.name + ']', msg.member.user.displayAvatarURL)
             .setDescription(msg.content)
-            .setColor(stringToColour(msg.member.displayName));    
+            .setColor(stringToColour(msg.member.displayName));
     if (typeof msg.attachments.first() !== 'undefined') {
         embed.setImage(msg.attachments.first().url);
     }
 
     client.guilds.forEach(function (guild) {
         if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id && msg.channel.name == 'general') {
-            if (guild.id == 297387654931152896) {
-                guild.channels.find('name', 'general').sendEmbed(embed);
-            }
+            guild.channels.find('name', 'general').sendEmbed(embed);
         }
     });
 });
