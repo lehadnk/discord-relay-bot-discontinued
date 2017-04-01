@@ -4,12 +4,12 @@
   "description": "Simple Discord relay server",
   "main": "index.js",
   "scripts": {
-    "start":"node index.js",
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "gnuheike <gnuheike@gmail.com>",
   "license": "ISC",
-  "dependencies": {
+  "dependencies": {  
     "discord.js": "^11.0.0"
   },
   "engines": {
