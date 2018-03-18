@@ -48,22 +48,39 @@ client.on('message', msg => {
         return;
     }
     
-    if (msg.member === 'undefined' || msg.member === null) return;
+    if (msg.member === 'undefined' || msg.member === null) {
+            var avatar = msg.author.displayAvatarURL !== 'undefined' ? msg.author.displayAvatarURL : 'https://www.sololearn.com/Images/NoAvatar.jpg';
+            var embed = new Discord.RichEmbed()
+                .setAuthor(msg.author.username + '  [' + msg.guild.name + ']', avatar)
+                .setDescription(msg.content)
+                .setColor(stringToColour(msg.author.username));
 
-    var embed = new Discord.RichEmbed()
-        .setAuthor(msg.member.displayName + '  [' + msg.guild.name + ']', msg.member.user.displayAvatarURL)
-        .setDescription(msg.content)
-        .setColor(stringToColour(msg.member.displayName));
-    
-    if (typeof msg.attachments.first() !== 'undefined') {
-        embed.setImage(msg.attachments.first().url);
+            if (typeof msg.attachments.first() !== 'undefined') {
+                embed.setImage(msg.attachments.first().url);
+            }
+
+            client.guilds.forEach(function (guild) {
+                if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id && (msg.channel.name == 'xmog-contest' || msg.channel.name == 'cross-chat') && (blacklist.indexOf(msg.author.id) == -1)) {
+                    guild.channels.find('name', msg.channel.name).sendEmbed(embed);
+                    console.log('success');
+                }
+            });
+    } else {
+            var embed = new Discord.RichEmbed()
+                .setAuthor(msg.member.displayName + '  [' + msg.guild.name + ']', msg.member.user.displayAvatarURL)
+                .setDescription(msg.content)
+                .setColor(stringToColour(msg.member.displayName));
+
+            if (typeof msg.attachments.first() !== 'undefined') {
+                embed.setImage(msg.attachments.first().url);
+            }
+
+            client.guilds.forEach(function (guild) {
+                if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id && (msg.channel.name == 'xmog-contest' || msg.channel.name == 'cross-chat') && (blacklist.indexOf(msg.author.id) == -1)) {
+                    guild.channels.find('name', msg.channel.name).sendEmbed(embed);
+                }
+            });
     }
-
-    client.guilds.forEach(function (guild) {
-        if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id && (msg.channel.name == 'xmog-contest' || msg.channel.name == 'cross-chat') && (blacklist.indexOf(msg.author.id) == -1)) {
-            guild.channels.find('name', msg.channel.name).sendEmbed(embed);
-        }
-    });
 });
 
 
