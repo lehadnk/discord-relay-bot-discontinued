@@ -57,8 +57,8 @@ if (typeof msg.attachments.first() !== 'undefined') {
 }
 
 client.guilds.forEach(function (guild) {
-    if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id && msg.channel.name == 'general' && (blacklist.indexOf(msg.author.id) == -1)) {
-        guild.channels.find('name', 'general').sendEmbed(embed);
+    if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id && (msg.channel.name == 'xmog-contest' || msg.channel.name == 'cross-chat') && (blacklist.indexOf(msg.author.id) == -1)) {
+        guild.channels.find('name', msg.channel.name).sendEmbed(embed);
     }
 });
 });
