@@ -37,22 +37,24 @@ var ban = function (id, channel) {
 
 client.on('message', msg => {
     if (msg.content.match(/^\/info ((?! ).)*$/)) {
-    var params = msg.content.split(' ');
-    getInfo(params[1], msg.channel);
-    return;
-}
+        var params = msg.content.split(' ');
+        getInfo(params[1], msg.channel);
+        return;
+    }
 
-if (msg.content.match(/^\/ban ((?! ).)*$/)) {
-    var params = msg.content.split(' ');
-    ban(params[1], msg.channel);
-    return;
-}
+    if (msg.content.match(/^\/ban ((?! ).)*$/)) {
+        var params = msg.content.split(' ');
+        ban(params[1], msg.channel);
+        return;
+    }
+    
+    if (msg.member === 'undefined') return;
 
-if (msg.member !== 'undefined') {
     var embed = new Discord.RichEmbed()
         .setAuthor(msg.member.displayName + '  [' + msg.guild.name + ']', msg.member.user.displayAvatarURL)
         .setDescription(msg.content)
         .setColor(stringToColour(msg.member.displayName));
+    
     if (typeof msg.attachments.first() !== 'undefined') {
         embed.setImage(msg.attachments.first().url);
     }
@@ -62,8 +64,7 @@ if (msg.member !== 'undefined') {
             guild.channels.find('name', msg.channel.name).sendEmbed(embed);
         }
     });
-    });
-}
+});
 
 
 client.login(process.env.BOT_TOKEN);
