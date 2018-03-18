@@ -48,7 +48,7 @@ client.on('message', msg => {
         return;
     }
     
-    if (msg.member === 'undefined') return;
+    if (msg.member === 'undefined' || msg.member === null) return;
 
     var embed = new Discord.RichEmbed()
         .setAuthor(msg.member.displayName + '  [' + msg.guild.name + ']', msg.member.user.displayAvatarURL)
