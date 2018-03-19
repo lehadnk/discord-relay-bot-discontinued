@@ -8,6 +8,12 @@ http.createServer(function (req, res) {}).listen(process.env.PORT || 6000);
 var fs = require('fs');
 var blacklist = fs.readFileSync('blacklist.txt').toString().split("\n");
 
+var synchedChannels = [
+    'cross-chat',
+    'xmog-contest',
+    'cross-addons-ui',
+];
+
 var stringToColour = function (str) {
     var hash = 0;
     for (var i = 0; i < str.length; i++) {
@@ -35,6 +41,45 @@ var ban = function (id, channel) {
     channel.send(id+' was added to relay blacklist.');
 }
 
+var getAvatar = function(msg) {
+    if (msg.member === 'undefined' || msg.member === null) {
+        return msg.author.displayAvatarUrl;
+    }
+    
+    return msg.member.user.displayAvatarURL;
+}
+
+var getNickname = function(msg) {
+    if (msg.member === 'undefined' || msg.member === null) {
+        return msg.author.username;
+    }
+    
+    return msg.member.user.displayName;
+}
+
+var getColor = function(msg) {
+    switch(msg.guild.id) {
+        case '207912188407578624':
+            return '#FFFFFF';
+        case '215548192891076610':
+            return '#A330C9';
+        case '217529023838814208':
+            return '#FFF569';
+        case '217529109272592384':
+            return '#C41F3B';
+        case '203632333620772874':
+            return '#FF7D0A';
+        case '215427955193544704':
+            return '#ABD473';
+        case '210643527472906241':
+            return '#F58CBA';
+        case '214750173413376003':
+            return '#0070DE';
+    }
+    
+    return '#999999';
+}
+
 client.on('message', msg => {
     if (msg.content.match(/^\/info ((?! ).)*$/)) {
         var params = msg.content.split(' ');
@@ -48,39 +93,23 @@ client.on('message', msg => {
         return;
     }
     
-    if (msg.member === 'undefined' || msg.member === null) {
-            var avatar = msg.author.displayAvatarURL !== 'undefined' ? msg.author.displayAvatarURL : 'https://www.sololearn.com/Images/NoAvatar.jpg';
-            var embed = new Discord.RichEmbed()
-                .setAuthor(msg.author.username + '  [' + msg.guild.name + ']', avatar)
-                .setDescription(msg.content)
-                .setColor(stringToColour(msg.author.username));
+    if (synchedChannels.indexOf(msg.channel.name) == -1) return;
+    if (blacklist.indexOf(msg.author.id) > -1) return;
+    
+    var embed = new Discord.RichEmbed()
+        .setAuthor(getNickname(msg) + '  [' + msg.guild.name + ']', getAvatar(msg))
+        .setDescription(msg.content)
+        .setColor(getColor(msg));
 
-            if (typeof msg.attachments.first() !== 'undefined') {
-                embed.setImage(msg.attachments.first().url);
-            }
-
-            client.guilds.forEach(function (guild) {
-                if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id && (msg.channel.name == 'xmog-contest' || msg.channel.name == 'cross-chat') && (blacklist.indexOf(msg.author.id) == -1)) {
-                    guild.channels.find('name', msg.channel.name).sendEmbed(embed);
-                    console.log('success');
-                }
-            });
-    } else {
-            var embed = new Discord.RichEmbed()
-                .setAuthor(msg.member.displayName + '  [' + msg.guild.name + ']', msg.member.user.displayAvatarURL)
-                .setDescription(msg.content)
-                .setColor(stringToColour(msg.member.displayName));
-
-            if (typeof msg.attachments.first() !== 'undefined') {
-                embed.setImage(msg.attachments.first().url);
-            }
-
-            client.guilds.forEach(function (guild) {
-                if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id && (msg.channel.name == 'xmog-contest' || msg.channel.name == 'cross-chat') && (blacklist.indexOf(msg.author.id) == -1)) {
-                    guild.channels.find('name', msg.channel.name).sendEmbed(embed);
-                }
-            });
+    if (typeof msg.attachments.first() !== 'undefined') {
+        embed.setImage(msg.attachments.first().url);
     }
+
+    client.guilds.forEach(function (guild) {
+        if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id) {
+            guild.channels.find('name', msg.channel.name).sendEmbed(embed);
+        }
+    });
 });
 
 
