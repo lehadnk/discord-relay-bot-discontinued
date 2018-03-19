@@ -30,7 +30,7 @@ var stringToColour = function (str) {
 
 var ban = function (id, channel) {
     blacklist.push(id);
-    fs.appendFile('blacklist.txt', id);
+    fs.appendFile('blacklist.txt', id+"\n");
     channel.send(id+' was added to relay blacklist.');
 }
 
@@ -38,7 +38,7 @@ var unban = function (id, channel) {
     if (blacklist.indexOf(id) > -1) {
         blacklist.splice(id, 1);
         fs.truncate('blacklist.txt', 0);
-        blacklist.forEach(function(b) { fs.appendFile('blacklist.txt', b); });
+        blacklist.forEach(function(b) { fs.appendFile('blacklist.txt', b+"\n"); });
         channel.send(id+' was removed from relay blacklist.');
     } else {
         channel.send(id+' is not blacklisted.');
