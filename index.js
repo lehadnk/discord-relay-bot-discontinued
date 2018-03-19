@@ -24,7 +24,7 @@ var ban = function (id, channel) {
 var unban = function (id, channel) {
     var index = blacklist.indexOf(id);
     if (id > -1) {
-        blacklist.splice(id, 1);
+        blacklist.splice(index, 1);
         fs.truncateSync('blacklist.txt', 0);
         blacklist.forEach(function(b) { fs.appendFile('blacklist.txt', b+"\n"); });
         channel.send(id+' was removed from relay blacklist.');
