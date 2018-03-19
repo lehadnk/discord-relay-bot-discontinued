@@ -105,7 +105,7 @@ client.on('message', msg => {
     if (blacklist.indexOf(msg.author.id) > -1) return;
     
     var embed = new Discord.RichEmbed()
-        .setAuthor(getNickname(msg) + '  [' + msg.guild.name + ']', getAvatar(msg))
+        .setAuthor(getNickname(msg), getAvatar(msg))
         .setDescription(msg.content)
         .setColor(getColor(msg));
 
