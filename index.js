@@ -22,7 +22,8 @@ var ban = function (id, channel) {
 }
 
 var unban = function (id, channel) {
-    if (blacklist.indexOf(id) > -1) {
+    var index = blacklist.indexOf(id);
+    if (id > -1) {
         blacklist.splice(id, 1);
         fs.truncateSync('blacklist.txt', 0);
         blacklist.forEach(function(b) { fs.appendFile('blacklist.txt', b+"\n"); });
@@ -116,7 +117,7 @@ client.on('message', msg => {
         if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id) {
             var channel = guild.channels.find('name', msg.channel.name);
             if (channel !== null) {
-                channel.sendEmbed(embed);
+                //channel.sendEmbed(embed);
             }
         }
     });
