@@ -15,19 +15,6 @@ var synchedChannels = [
     'cross-addons-ui',
 ];
 
-var stringToColour = function (str) {
-    var hash = 0;
-    for (var i = 0; i < str.length; i++) {
-        hash = str.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    var colour = '#';
-    for (var i = 0; i < 3; i++) {
-        var value = (hash >> (i * 8)) & 0xFF;
-        colour += ('00' + value.toString(16)).substr(-2);
-    }
-    return colour;
-}
-
 var ban = function (id, channel) {
     blacklist.push(id);
     fs.appendFile('blacklist.txt', id+"\n");
@@ -37,7 +24,7 @@ var ban = function (id, channel) {
 var unban = function (id, channel) {
     if (blacklist.indexOf(id) > -1) {
         blacklist.splice(id, 1);
-        fs.truncate('blacklist.txt', 0);
+        fs.truncateSync('blacklist.txt', 0);
         blacklist.forEach(function(b) { fs.appendFile('blacklist.txt', b+"\n"); });
         channel.send(id+' was removed from relay blacklist.');
     } else {
