@@ -7,6 +7,7 @@ http.createServer(function (req, res) {}).listen(process.env.PORT || 6000);
 // Loading blacklist
 var fs = require('fs');
 var blacklist = fs.readFileSync('blacklist.txt').toString().split("\n");
+var adminList = fs.readFileSync('admins.txt').toString().split("\n");
 
 var synchedChannels = [
     'cross-chat',
@@ -31,6 +32,17 @@ var ban = function (id, channel) {
     blacklist.push(id);
     fs.appendFile('blacklist.txt', id);
     channel.send(id+' was added to relay blacklist.');
+}
+
+var unban = function (id, channel) {
+    if (blacklist.indexOf(id) > -1) {
+        blacklist.splice(id, 1);
+        fs.truncate('blacklist.txt', 0);
+        blacklist.forEach(function(b) { fs.appendFile('blacklist.txt', b); });
+        channel.send(id+' was removed from relay blacklist.');
+    } else {
+        channel.send(id+' is not blacklisted.');
+    }
 }
 
 var getAvatar = function(msg) {
@@ -80,10 +92,24 @@ var getColor = function(msg) {
     return '#999999'; // undefined
 }
 
-client.on('message', msg => {
-    if (msg.content.match(/^\/crossban ((?! ).)*$/)) {
+client.on('message', msg => {    
+    if (msg.content.match(/^\/tcrossban ((?! ).)*$/)) {
+        if (adminList.indexOf(msg.author.id) == -1) {
+            msg.channel.send("You're not permitted to do this, bitch");
+            return;
+        }
         var params = msg.content.split(' ');
         ban(params[1], msg.channel);
+        return;
+    }
+    
+    if (msg.content.match(/^\/tcrossunban ((?! ).)*$/)) {
+        if (adminList.indexOf(msg.author.id) == -1) {
+            msg.channel.send("You're not permitted to do this, bitch");
+            return;
+        }
+        var params = msg.content.split(' ');
+        unban(params[1], msg.channel);
         return;
     }
     
@@ -101,7 +127,10 @@ client.on('message', msg => {
 
     client.guilds.forEach(function (guild) {
         if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id) {
-            guild.channels.find('name', msg.channel.name).sendEmbed(embed);
+            var channel = guild.channels.find('name', msg.channel.name);
+            if (channel !== null) {
+                channel.sendEmbed(embed);
+            }
         }
     });
 });

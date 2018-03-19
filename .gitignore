@@ -5,6 +5,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 blacklist.txt
+admins.txt
 
 # Runtime data
 pids
