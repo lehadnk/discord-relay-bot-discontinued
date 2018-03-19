@@ -93,7 +93,7 @@ var getColor = function(msg) {
 }
 
 client.on('message', msg => {    
-    if (msg.content.match(/^\/tcrossban ((?! ).)*$/)) {
+    if (msg.content.match(/^\/crossban ((?! ).)*$/)) {
         if (adminList.indexOf(msg.author.id) == -1) {
             msg.channel.send("You're not permitted to do this, bitch");
             return;
@@ -103,7 +103,7 @@ client.on('message', msg => {
         return;
     }
     
-    if (msg.content.match(/^\/tcrossunban ((?! ).)*$/)) {
+    if (msg.content.match(/^\/crossunban ((?! ).)*$/)) {
         if (adminList.indexOf(msg.author.id) == -1) {
             msg.channel.send("You're not permitted to do this, bitch");
             return;
