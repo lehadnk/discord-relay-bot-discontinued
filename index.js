@@ -27,14 +27,6 @@ var stringToColour = function (str) {
     return colour;
 }
 
-var getInfo = function (name, channel) {
-    client.users.forEach(function (user) {
-        if (user.username == name) {
-            channel.send(user.username+': '+user.id);
-        }
-    });
-}
-
 var ban = function (id, channel) {
     blacklist.push(id);
     fs.appendFile('blacklist.txt', id);
@@ -89,13 +81,7 @@ var getColor = function(msg) {
 }
 
 client.on('message', msg => {
-    if (msg.content.match(/^\/info ((?! ).)*$/)) {
-        var params = msg.content.split(' ');
-        getInfo(params[1], msg.channel);
-        return;
-    }
-
-    if (msg.content.match(/^\/ban ((?! ).)*$/)) {
+    if (msg.content.match(/^\/crossban ((?! ).)*$/)) {
         var params = msg.content.split(' ');
         ban(params[1], msg.channel);
         return;
