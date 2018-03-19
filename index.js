@@ -54,7 +54,7 @@ var getNickname = function(msg) {
         return msg.author.username;
     }
     
-    return msg.member.user.displayName;
+    return msg.member.displayName;
 }
 
 var getColor = function(msg) {
