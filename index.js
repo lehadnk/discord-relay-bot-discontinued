@@ -117,7 +117,7 @@ client.on('message', msg => {
         if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id) {
             var channel = guild.channels.find('name', msg.channel.name);
             if (channel !== null) {
-                //channel.sendEmbed(embed);
+                channel.sendEmbed(embed);
             }
         }
     });
