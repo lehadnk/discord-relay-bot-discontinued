@@ -38,6 +38,10 @@ var getAvatar = function(msg) {
         return msg.author.displayAvatarUrl;
     }
     
+    if (msg.member.id == '207169330549358592' && msg.guild.id == '203632333620772874') {
+        return 'https://i.imgur.com/UBFnkWL.png';
+    }
+    
     return msg.member.user.displayAvatarURL;
 }
 
