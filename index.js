@@ -2,7 +2,10 @@
 const Discord = require("discord.js");
 const client = new Discord.Client();
 const http = require('http');
+const sqlite3 = require('sqlite3').verbose();
+
 http.createServer(function (req, res) {}).listen(process.env.PORT || 6000);
+var db = new sqlite3.Database('database.db3');
 
 // Loading blacklist
 var fs = require('fs');
@@ -13,6 +16,7 @@ var synchedChannels = [
     'cross-chat',
     'xmog-contest',
     'cross-addons-ui',
+    'xmog-contest-test',
 ];
 
 var ban = function (id, channel) {
@@ -84,7 +88,40 @@ var getColor = function(msg) {
     return '#999999'; // undefined
 }
 
+//client.on('messageReactionAdd', (reaction, user) => {
+//   console.log('Reaction added'); 
+//});
+
+var doVote = function(msg) {
+    var params = msg.content.split(' ');
+    params.splice(0, 1);
+    var name = params.join(' ');
+    
+    msg.channel.send("New vote for: **"+name+"**");
+    
+    
+    msg.delete(1000);
+}
+
+var participantAdd = function(msg) {
+    if (typeof msg.attachments.first() === 'undefined') return false;
+    if (msg.content.length < 3) return false;
+    if (msg.content.length > 40) return false;
+    
+    db.run("INSERT INTO participants(discord_id, name) VALUES (?1, ?2)", {
+          1: msg.author.id,
+          2: msg.content
+    });
+    msg.channel.send("New participant added: **"+msg.content+"**");
+    
+    return true;
+}
+
 client.on('message', msg => {    
+    if (client.user.id === msg.author.id) {
+        return;
+    }
+    
     if (msg.content.match(/^\/crossban ((?! ).)*$/)) {
         if (adminList.indexOf(msg.author.id) == -1) {
             msg.channel.send("You're not permitted to do this, bitch");
@@ -103,6 +140,31 @@ client.on('message', msg => {
         var params = msg.content.split(' ');
         unban(params[1], msg.channel);
         return;
+    }
+    
+    if (msg.content.match(/^\/xmog-participants-list/)) {
+        var sql = "SELECT name FROM participants";
+        
+        db.all(sql, (err, rows) => {
+            var response = "**Participants list:**\n";
+            rows.forEach((row) => {
+                response += row.name+"\n";
+            })
+            msg.channel.send(response);
+        });
+    }
+    
+    if (msg.content.match(/^\/vote .*$/) && msg.channel.name == 'xmog-contest-test') {
+        doVote(msg);
+        console.log('Vote command');
+    }
+    
+    if (msg.channel.name == 'xmog-contest-test') {
+        var result = participantAdd(msg);
+        if (!result) {
+            msg.delete(1000);
+            return;
+        }
     }
     
     if (synchedChannels.indexOf(msg.channel.name) == -1) return;

@@ -9,8 +9,9 @@
   },
   "author": "gnuheike <gnuheike@gmail.com>",
   "license": "ISC",
-  "dependencies": {  
-    "discord.js": "^11.0.0"
+  "dependencies": {
+    "discord.js": "^11.0.0",
+    "sqlite3": "^4.0.0"
   },
   "engines": {
     "node": "^6.00.0"
