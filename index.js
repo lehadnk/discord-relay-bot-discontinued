@@ -88,39 +88,145 @@ var getColor = function(msg) {
     return '#999999'; // undefined
 }
 
-//client.on('messageReactionAdd', (reaction, user) => {
-//   console.log('Reaction added'); 
-//});
-
 var doVote = function(msg) {
     var params = msg.content.split(' ');
     params.splice(0, 1);
-    var name = params.join(' ');
+    var unparsedName = params.join(' ');
     
-    msg.channel.send("New vote for: **"+name+"**");
+    var charInfo = unparsedName.split('-');
+    if (charInfo.length != 2) {
+        temporaryMessage(msg.channel, "Please enter character name in corresponding format (Name - Realm)", 7000);
+        msg.delete(1000);
+        return;
+    }
     
+    
+    var name = parseName(charInfo);
+    
+    db.get("SELECT id, discord_id FROM participants WHERE parsed_name = ?1", {1:name}, (err, row) => {
+            if (typeof row === 'undefined') {
+                temporaryMessage(msg.channel, "No such participant found: "+unparsedName+". Are you sure that you're right with the spelling?", 10000);
+                return;
+            }
+        
+            var participant_id = row.id;
+        
+            if (row.discord_id == msg.author.id) {
+                temporaryMessage(msg.channel, "Voting for yourself to have some extra credit? How silly it is, "+getNickname(msg), 10000);
+                return;
+            }
+            
+            db.get(
+                "SELECT count(id) as cnt FROM votes WHERE participant_id = ?1 AND discord_id = ?2",
+                {
+                    1: participant_id,
+                    2: msg.author.id
+                },
+                (err, row) => {
+                        if (row.cnt > 0) {
+                            temporaryMessage(msg.channel, "Sorry, "+getNickname(msg)+", you already voted for "+unparsedName+"!", 10000);
+                        } else {
+                            db.run("INSERT INTO votes(discord_id, participant_id) VALUES (?1, ?2)", {
+                                  1: msg.author.id,
+                                  2: participant_id
+                            });
+                            temporaryMessage(msg.channel, "Alright, your vote counted, "+getNickname(msg));
+                        }
+                }
+            );
+    });
     
     msg.delete(1000);
 }
 
-var participantAdd = function(msg) {
-    if (typeof msg.attachments.first() === 'undefined') return false;
-    if (msg.content.length < 3) return false;
-    if (msg.content.length > 40) return false;
+var synchMessage = function(msg) {
+    var embed = new Discord.RichEmbed()
+        .setAuthor(getNickname(msg), getAvatar(msg))
+        .setDescription(msg.content)
+        .setColor(getColor(msg));
+
+    if (typeof msg.attachments.first() !== 'undefined') {
+        embed.setImage(msg.attachments.first().url);
+    }
     
-    db.run("INSERT INTO participants(discord_id, name) VALUES (?1, ?2)", {
-          1: msg.author.id,
-          2: msg.content
+    client.guilds.forEach(function (guild) {
+        if (guild.id !== msg.guild.id) {
+            var channel = guild.channels.find('name', msg.channel.name);
+            if (channel !== null) {
+                channel.sendEmbed(embed);
+            }
+        }
     });
-    msg.channel.send("New participant added: **"+msg.content+"**");
-    
-    return true;
 }
 
-client.on('message', msg => {    
-    if (client.user.id === msg.author.id) {
+var parseName = function(charInfo) {
+    var charName = charInfo[0].trim().toLowerCase().replace(/ /g,'');
+    if (charName.length > 12) {
+        throw "Character name cannot be longer than 12 letters long";
+    }
+    if (charName.length < 2) {
+        throw "Character name cannot be less than 2 letters long";
+    }
+    var charRealm = charInfo[1].trim().toLowerCase().replace(/ /g,'');
+    if (charRealm.length < 5) {
+        throw "Realm name cannot be less than 5 letters long";
+    }
+    if (charRealm.length > 20) {
+        throw "Realm name cannot be more than 20 letters long";
+    }
+    
+    return charName+'-'+charRealm;
+}
+
+var participantAdd = function(msg) {
+    if (typeof msg.attachments.first() === 'undefined') {
+        msg.delete(1000);
         return;
     }
+    if (msg.content.length < 10) {
+        msg.delete(1000);
+        return;
+    }
+    
+    var charInfo = msg.content.split('-');
+    if (charInfo.length != 2) {
+        temporaryMessage(msg.channel, "Please enter character name in corresponding format (Name - Realm)", 10000);
+        msg.delete(1000);
+        return;
+    }
+    
+    db.get(
+        "SELECT count(id) as cnt FROM participants WHERE discord_id = ?1",
+        {
+            1: msg.author.id
+        },
+        (err, row) => {
+            if (row.cnt > 0) {
+                temporaryMessage(msg.channel, "Sorry, "+getNickname(msg)+", you can participate with only one character.", 9000);
+                msg.delete(1000);
+                return false;
+            } else {
+                var parsedName = parseName(msg.content);
+                db.run("INSERT INTO participants(discord_id, name, parsed_name) VALUES (?1, ?2, ?3)", {
+                      1: msg.author.id,
+                      2: msg.content,
+                      3: parseName(charInfo)
+                });
+                temporaryMessage(msg.channel, "New participant added: **"+msg.content+"**", 7000);
+                synchMessage(msg);
+            }
+        }
+    );
+}
+
+var temporaryMessage = function(channel, text, lifespan) {
+    var response = channel.send(text);
+    response.then((m) => { m.delete(lifespan); });
+};
+
+client.on('message', msg => {    
+    if (client.user.id === msg.author.id) return;
+    if (msg.author.bot == true) return;
     
     if (msg.content.match(/^\/crossban ((?! ).)*$/)) {
         if (adminList.indexOf(msg.author.id) == -1) {
@@ -143,50 +249,40 @@ client.on('message', msg => {
     }
     
     if (msg.content.match(/^\/xmog-participants-list/)) {
-        var sql = "SELECT name FROM participants";
+        var sql = "SELECT p.name, count(v.id) as cnt FROM participants p LEFT JOIN votes v ON p.id = v.participant_id GROUP BY p.name ORDER BY cnt DESC";
         
         db.all(sql, (err, rows) => {
             var response = "**Participants list:**\n";
             rows.forEach((row) => {
-                response += row.name+"\n";
+                response += row.name+" - "+row.cnt+"\n";
             })
-            msg.channel.send(response);
+            temporaryMessage(msg.channel, response, 25000);
         });
     }
     
     if (msg.content.match(/^\/vote .*$/) && msg.channel.name == 'xmog-contest-test') {
-        doVote(msg);
-        console.log('Vote command');
+        try {
+            doVote(msg);
+        } catch(err) {
+            temporaryMessage(msg.channel, err, 8000);
+        }
+        
+        return;
     }
     
     if (msg.channel.name == 'xmog-contest-test') {
-        var result = participantAdd(msg);
-        if (!result) {
-            msg.delete(1000);
-            return;
+        try {
+            participantAdd(msg);
+        } catch(err) {
+            temporaryMessage(msg.channel, err, 8000);
         }
+        return;
     }
     
     if (synchedChannels.indexOf(msg.channel.name) == -1) return;
     if (blacklist.indexOf(msg.author.id) > -1) return;
-    
-    var embed = new Discord.RichEmbed()
-        .setAuthor(getNickname(msg), getAvatar(msg))
-        .setDescription(msg.content)
-        .setColor(getColor(msg));
 
-    if (typeof msg.attachments.first() !== 'undefined') {
-        embed.setImage(msg.attachments.first().url);
-    }
-
-    client.guilds.forEach(function (guild) {
-        if (client.user.id !== msg.author.id && msg.author.bot == false && guild.id !== msg.guild.id) {
-            var channel = guild.channels.find('name', msg.channel.name);
-            if (channel !== null) {
-                channel.sendEmbed(embed);
-            }
-        }
-    });
+    synchMessage(msg);
 });
 
 
