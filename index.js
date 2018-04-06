@@ -8,8 +8,15 @@ http.createServer(function (req, res) {}).listen(process.env.PORT || 6000);
 var db = new sqlite3.Database('database.db3');
 
 // Loading blacklist
+var blacklist = [];
+db.all("SELECT discord_id FROM bans", (err, rows) => {
+    rows.forEach((row) => {
+        blacklist.push(row.discord_id);
+    }); 
+});
+
+// Loading admin list
 var fs = require('fs');
-var blacklist = fs.readFileSync('blacklist.txt').toString().split("\n");
 var adminList = fs.readFileSync('admins.txt').toString().split("\n");
 
 var synchedChannels = [
@@ -18,24 +25,6 @@ var synchedChannels = [
     'cross-addons-ui',
     'xmog-contest-test',
 ];
-
-var ban = function (id, channel) {
-    blacklist.push(id);
-    fs.appendFile('blacklist.txt', id+"\n");
-    channel.send(id+' was added to relay blacklist.');
-}
-
-var unban = function (id, channel) {
-    var index = blacklist.indexOf(id);
-    if (id > -1) {
-        blacklist.splice(index, 1);
-        fs.truncateSync('blacklist.txt', 0);
-        blacklist.forEach(function(b) { fs.appendFile('blacklist.txt', b+"\n"); });
-        channel.send(id+' was removed from relay blacklist.');
-    } else {
-        channel.send(id+' is not blacklisted.');
-    }
-}
 
 var getAvatar = function(msg) {
     if (msg.member === 'undefined' || msg.member === null) {
@@ -219,6 +208,84 @@ var participantAdd = function(msg) {
     );
 }
 
+var ban = function(msg) {
+    if (adminList.indexOf(msg.author.id) == -1) {
+        msg.channel.send("You're not permitted to do this, bitch");
+        return;
+    }
+        
+    var msgData = msg.content.split(' ');
+    if (msgData.length < 3) {
+        throw "To ban someone, you must enter discord id and reason";
+    }
+    
+    var command = msgData.splice(0, 1).join();
+    var discordId = msgData.splice(0, 1).join();
+    var reason = msgData.join(' ');
+    
+    db.run("INSERT INTO bans(discord_id, reason, issuer_discord_id, issuer_discord_name, issued_at) VALUES (?1, ?2, ?3, ?4, ?5)", {
+        1: discordId,
+        2: reason,
+        3: msg.author.id,
+        4: getNickname(msg),
+        5: new Date().toISOString()
+    });
+    blacklist.push(discordId);
+    
+    var banMessageResponse = msg.channel.send("User "+discordId+" was banned in crosschat channels by "+getNickname(msg)+". Reason: "+reason);
+    banMessageResponse.then((m) => { synchMessage(m); });
+}
+
+var unban = function(msg) {
+    if (adminList.indexOf(msg.author.id) == -1) {
+        msg.channel.send("You're not permitted to do this, bitch");
+        return;
+    }
+    
+    var msgData = msg.content.split(' ');
+    
+    if (msgData.length != 2) {
+        throw "Wrong message format: should be /crossunban <id>";
+    }
+    
+    var discordId = msgData[1];
+    
+    var index = blacklist.indexOf(discordId);
+    if (index > -1) {
+        blacklist.splice(index, 1);
+        db.run("DELETE FROM bans WHERE discord_id = ?1", {1: discordId});
+
+        var messageResponse = msg.channel.send("User's "+discordId+" ban was removed by "+getNickname(msg));
+        messageResponse.then((m) => { synchMessage(m); });
+    } else {
+        temporaryMessage(msg.channel, discordId+" is not blacklisted.", 8000);
+    }
+}
+
+var baninfo = function(msg) {
+    if (adminList.indexOf(msg.author.id) == -1) {
+        msg.channel.send("You're not permitted to do this, bitch");
+        return;
+    }
+    
+    var msgData = msg.content.split(' ');
+    
+    if (msgData.length != 2) {
+        throw "Wrong message format: should be /crossunban <id>";
+    }
+    
+    var discordId = msgData[1];
+    db.all("SELECT * FROM bans WHERE discord_id = ?1", {1: discordId}, (err, rows) => {
+        if (rows.length == 0) {
+            msg.channel.send("User "+discordId+" is not banned.");
+        } else {
+            rows.forEach((row) => {
+                msg.channel.send("User "+row.discord_id+" was banned by "+row.issuer_discord_name+" at "+row.issued_at+". Reason: "+row.reason);
+            })
+        }
+    });
+}
+
 var temporaryMessage = function(channel, text, lifespan) {
     var response = channel.send(text);
     response.then((m) => { m.delete(lifespan); });
@@ -228,25 +295,46 @@ client.on('message', msg => {
     if (client.user.id === msg.author.id) return;
     if (msg.author.bot == true) return;
     
-    if (msg.content.match(/^\/crossban ((?! ).)*$/)) {
-        if (adminList.indexOf(msg.author.id) == -1) {
-            msg.channel.send("You're not permitted to do this, bitch");
-            return;
+    if (msg.content.match(/^\/crossban .*$/)) {
+        try {
+            ban(msg);
+        } catch(err) {
+            temporaryMessage(msg.channel, err, 8000);
         }
-        var params = msg.content.split(' ');
-        ban(params[1], msg.channel);
         return;
     }
     
-    if (msg.content.match(/^\/crossunban ((?! ).)*$/)) {
-        if (adminList.indexOf(msg.author.id) == -1) {
-            msg.channel.send("You're not permitted to do this, bitch");
-            return;
+    if (msg.content.match(/^\/crossunban .*$/)) {
+        try {
+            unban(msg);
+        } catch(err) {
+            temporaryMessage(msg.channel, err, 8000);
         }
-        var params = msg.content.split(' ');
-        unban(params[1], msg.channel);
         return;
     }
+    
+    if (msg.content.match(/^\/crossbaninfo .*$/)) {
+        try {
+            baninfo(msg);
+        } catch(err) {
+            temporaryMessage(msg.channel, err, 8000);
+        }
+        return;
+    }
+    
+    if (msg.content.match(/^\/crossbanlist$/)) {
+        var sql = "SELECT * FROM bans";
+        
+        db.all(sql, (err, rows) => {
+            var response = "**Crosschat ban list:**\n";
+            rows.forEach((row) => {
+                response += row.discord_id+" by "+row.issuer_discord_name+" at "+row.issued_at+" reason: "+row.reason+"\n";
+            })
+            temporaryMessage(msg.channel, response, 25000);
+        });
+    }
+        
+    if (blacklist.indexOf(msg.author.id) > -1) return;
     
     if (msg.content.match(/^\/xmog-participants-list/)) {
         var sql = "SELECT p.name, count(v.id) as cnt FROM participants p LEFT JOIN votes v ON p.id = v.participant_id GROUP BY p.name ORDER BY cnt DESC";
@@ -280,7 +368,6 @@ client.on('message', msg => {
     }
     
     if (synchedChannels.indexOf(msg.channel.name) == -1) return;
-    if (blacklist.indexOf(msg.author.id) > -1) return;
 
     synchMessage(msg);
 });
