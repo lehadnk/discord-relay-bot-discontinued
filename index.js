@@ -362,7 +362,7 @@ client.on('message', msg => {
         return;
     }
     
-    if (msg.channel.name == 'xmog-contest-test') {
+    if (msg.channel.name == 'xmog-contest') {
         try {
             participantAdd(msg);
         } catch(err) {
