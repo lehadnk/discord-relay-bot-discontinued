@@ -347,12 +347,7 @@ client.on('message', msg => {
         });
     }
     
-    if (msg.content.match(/^\/vote .*$/) && msg.channel.name == 'xmog-contest') {
-        if (msg.author.id != 207169330549358592) {
-            msg.delete();
-            return;
-        }
-        
+    if (msg.content.match(/^\/vote .*$/) && msg.channel.name == 'xmog-contest') {        
         try {
             doVote(msg);
         } catch(err) {
@@ -363,12 +358,17 @@ client.on('message', msg => {
     }
     
     if (msg.channel.name == 'xmog-contest') {
-        try {
-            participantAdd(msg);
-        } catch(err) {
-            temporaryMessage(msg.channel, err, 8000);
+        if (msg.author.id != 207169330549358592) {
+            msg.delete();
+            return;
         }
-        return;
+        
+//        try {
+//            participantAdd(msg);
+//        } catch(err) {
+//            temporaryMessage(msg.channel, err, 8000);
+//        }
+//        return;
     }
     
     if (synchedChannels.indexOf(msg.channel.name) == -1) return;
