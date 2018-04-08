@@ -88,7 +88,6 @@ var doVote = function(msg) {
         return;
     }
     
-    
     var name = parseName(charInfo);
     
     db.get("SELECT id, discord_id FROM participants WHERE parsed_name = ?1", {1:name}, (err, row) => {
@@ -183,6 +182,8 @@ var participantAdd = function(msg) {
         return;
     }
     
+    var charName = parseName(charInfo);
+    
     db.get(
         "SELECT count(id) as cnt FROM participants WHERE discord_id = ?1",
         {
@@ -194,11 +195,10 @@ var participantAdd = function(msg) {
                 msg.delete(1000);
                 return false;
             } else {
-                var parsedName = parseName(msg.content);
                 db.run("INSERT INTO participants(discord_id, name, parsed_name) VALUES (?1, ?2, ?3)", {
                       1: msg.author.id,
                       2: msg.content,
-                      3: parseName(charInfo)
+                      3: charName
                 });
                 temporaryMessage(msg.channel, "New participant added: **"+msg.content+"**", 7000);
                 synchMessage(msg);
@@ -362,7 +362,7 @@ client.on('message', msg => {
             msg.delete();
             return;
         }
-        
+//        
 //        try {
 //            participantAdd(msg);
 //        } catch(err) {
