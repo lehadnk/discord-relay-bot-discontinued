@@ -23,7 +23,6 @@ var synchedChannels = [
     'cross-chat',
     'xmog-contest',
     'cross-addons-ui',
-    'xmog-contest-test',
 ];
 
 var getAvatar = function(msg) {
@@ -348,7 +347,12 @@ client.on('message', msg => {
         });
     }
     
-    if (msg.content.match(/^\/vote .*$/) && msg.channel.name == 'xmog-contest-test') {
+    if (msg.content.match(/^\/vote .*$/) && msg.channel.name == 'xmog-contest') {
+        if (msg.author.id != 207169330549358592) {
+            msg.delete();
+            return;
+        }
+        
         try {
             doVote(msg);
         } catch(err) {
