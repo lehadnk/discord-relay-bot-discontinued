@@ -26,15 +26,19 @@ var synchedChannels = [
 ];
 
 var getAvatar = function(msg) {
-    if (msg.member === 'undefined' || msg.member === null) {
-        return msg.author.displayAvatarUrl;
-    }
-    
-    if (msg.member.id == '207169330549358592' && msg.guild.id == '203632333620772874') {
+    if (msg.member !== 'undefined' && msg.guild !== 'undefined' && msg.member.id == '207169330549358592' && msg.guild.id == '203632333620772874') {
         return 'https://i.imgur.com/UBFnkWL.png';
     }
     
-    return msg.member.user.displayAvatarURL;
+    if (msg.author !== 'undefined' && msg.author.displayAvatarUrl !== 'undefined') {
+        return msg.author.displayAvatarURL;
+    }
+    
+    if (msg.member !== 'undefined' && msg.member.user.displayAvatarUrl !== 'undefined') {
+        msg.member.user.displayAvatarURL;
+    }
+    
+    return null;
 }
 
 var getNickname = function(msg) {
