@@ -30,15 +30,7 @@ var getAvatar = function(msg) {
         return 'https://i.imgur.com/UBFnkWL.png';
     }
     
-    if (msg.author !== 'undefined' && msg.author.displayAvatarUrl !== 'undefined') {
-        return msg.author.displayAvatarURL;
-    }
-    
-    if (msg.member !== 'undefined' && msg.member.user.displayAvatarUrl !== 'undefined') {
-        msg.member.user.displayAvatarURL;
-    }
-    
-    return null;
+    return msg.author.displayAvatarURL;
 }
 
 var getNickname = function(msg) {
@@ -297,6 +289,10 @@ var temporaryMessage = function(channel, text, lifespan) {
 client.on('message', msg => {    
     if (client.user.id === msg.author.id) return;
     if (msg.author.bot == true) return;
+    
+    if (msg.author.id == '234600840575451136') {
+        console.log(msg)
+    }
     
     if (msg.content.match(/^\/crossban .*$/)) {
         try {
