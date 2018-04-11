@@ -26,7 +26,7 @@ var synchedChannels = [
 ];
 
 var getAvatar = function(msg) {
-    if (msg.member !== 'undefined' && msg.guild !== 'undefined' && msg.member.id == '207169330549358592' && msg.guild.id == '203632333620772874') {
+    if (msg.author.id == '207169330549358592' && msg.guild.id == '203632333620772874') {
         return 'https://i.imgur.com/UBFnkWL.png';
     }
     
