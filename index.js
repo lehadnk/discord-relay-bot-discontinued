@@ -120,7 +120,7 @@ client.on('message', msg => {
     
     if (synchedChannels.indexOf(msg.channel.name) == -1) return;
 
-    chatFunctions.SynchMessage(client, msg);
+    chatFunctions.synchMessage(client, msg);
 });
 
 client.login(process.env.BOT_TOKEN);
