@@ -61,10 +61,10 @@ var isXmogContestChannel = function(channel) {
 }
 exports.isXmogContestChannel = isXmogContestChannel;
 
-var saveParticipantMsgId = function(db, participantDiscordId, serverId, msg) {
+var saveParticipantMsgId = function(db, participantDiscordId, msg) {
     db.run("INSERT INTO participant_posts(participant_discord_id, discord_server_id, discord_message_id) VALUES (?1, ?2, ?3)", {
           1: participantDiscordId,
-          2: serverId,
+          2: msg.guild.id,
           3: msg.id
     });
 }
@@ -110,9 +110,9 @@ exports.participantAdd = function(client, db, msg) {
                 chatFunctions.synchMessage(
                     client,
                     msg,
-                    saveParticipantMsgId.bind(null, db, msg.author.id, msg.guild.id)
+                    saveParticipantMsgId.bind(null, db, msg.author.id)
                 );
-                saveParticipantMsgId(db, msg.author.id, msg.guild.id, msg);
+                saveParticipantMsgId(db, msg.author.id, msg);
             }
         }
     );
@@ -180,33 +180,39 @@ exports.doVote = function(db, msg) {
     msg.delete(1000);
 }
 
-//exports.removeParticipant = function(db, msg) {
-//    var params = msg.content.split(' ');
-//    
-//    if (params.length < 2) {
-//        throw "You're required to provide discord_id";
-//    }
-//    
-//    var discordId = params[1];
-//    
-//    db.get("SELECT * FROM participants WHERE discord_id = ?1", {1:discordId}, (err, row) => {
-//        if (typeof row === 'undefined') {
-//            chatFunctions.temporaryMessage(msg.channel, "No participant with discord_id found: "+discordId+". Are you sure that you're right with the spelling?", 10000);
-//            return;
-//        }
-//        
-//        client.guilds.forEach(function (guild) {
-//            channels.forEach(function (channel)) {
-//                if (isXmogContestChannel(channel)) {
-//                    channel.fetchMessages({limit: 100}).then(messages => {
-//                        
-//                    }
-//                }
-//            }
-//            var channel = guild.channels.find('xmog-contest', msg.channel.name);
-//            if (channel !== null) {
-//                channel.sendEmbed(embed);
-//            }
-//        });
-//    });
-//}
+exports.removeParticipant = function(db, msg, client) {
+    var params = msg.content.split(' ');
+    
+    if (params.length < 2) {
+        throw "You're required to provide discord_id";
+    }
+    
+    var discordId = params[1];
+    
+    db.all("SELECT * FROM participant_posts WHERE participant_discord_id = ?1", {1: discordId}, (err, rows) => {
+        if (typeof rows === 'undefined') {
+            chatFunctions.temporaryMessage(msg.channel, "No participant with discord_id found: "+discordId+". Are you sure that you're right with the spelling?", 10000);
+            return;
+        }
+        
+        rows.forEach(function(row) {
+            var guild = client.guilds.get(row.discord_server_id);
+            if (guild == null) {
+                return;
+            }
+            
+            var channel = guild.channels.find('name', 'xmog-contest-test');
+            var message = channel.fetchMessages({around: row.discord_message_id, limit: 1}).then(messages => {
+                messages.forEach(msg => {
+                    msg.delete();
+                });
+            });
+        });
+    });
+    
+    db.run("DELETE FROM participants WHERE discord_id = ?1", {
+        1: discordId
+    });
+    
+    chatFunctions.temporaryMessage(msg.channel, "User "+discordId+" was removed from contest.", 12000);
+}

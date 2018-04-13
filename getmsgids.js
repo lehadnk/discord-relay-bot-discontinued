@@ -15,7 +15,7 @@ var linkMessage = function(msgId, serverId, parsedName) {
             if (typeof row === 'undefined') {
                 console.error("Unable to find participant: "+parsedName);
             } else {
-                contest.saveParticipantMsgId(db, row.discord_id, serverId, {id: msgId});
+                contest.saveParticipantMsgId(db, row.discord_id, {id: msgId, guild: {id: serverId}});
                 console.log("Added msg "+msgId+" for "+row.id);
             }
         }
@@ -50,7 +50,7 @@ client.login(process.env.BOT_TOKEN).then(() => {
     client.guilds.forEach(function (guild) {
         console.log("Parsing "+guild.id);
         
-        var channel = guild.channels.find('name', 'xmog-contest');
+        var channel = guild.channels.find('name', 'xmog-contest-test');
         if (channel == null) {
             return;
         }
