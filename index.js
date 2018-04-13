@@ -18,10 +18,10 @@ var fs = require('fs');
 var adminList = fs.readFileSync('admins.txt').toString().split("\n");
 
 var synchedChannels = [
-//    'cross-chat',
-//    'xmog-contest',
-      'xmog-contest-test',
-//    'cross-addons-ui',
+    'cross-chat',
+    'xmog-contest',
+    'xmog-contest-test',
+    'cross-addons-ui',
 ];
 
 var isAdmin = function(user) {

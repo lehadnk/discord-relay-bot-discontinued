@@ -20,7 +20,7 @@ parseName = function(charInfo) {
 }
 
 exports.isXmogContestChannel = function(channel) {
-    return channel.name == 'xmog-contest-test';
+    return channel.name == 'xmog-contest';
 }
 
 exports.participantAdd = function(client, db, msg) {
