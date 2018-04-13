@@ -8,6 +8,7 @@ blacklist.txt
 admins.txt
 *.db3
 deploy.sh
+restart.sh
 
 # Runtime data
 pids
