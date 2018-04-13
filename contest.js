@@ -57,7 +57,7 @@ var getCharInfoFromParam = function(msg) {
 exports.getCharInfo = getCharInfoFromParam;
 
 var isXmogContestChannel = function(channel) {
-    return channel.name == 'xmog-contest-test';
+    return channel.name == 'xmog-contest';
 }
 exports.isXmogContestChannel = isXmogContestChannel;
 

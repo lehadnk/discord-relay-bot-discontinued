@@ -7,6 +7,7 @@ yarn-error.log*
 blacklist.txt
 admins.txt
 *.db3
+deploy.sh
 
 # Runtime data
 pids
