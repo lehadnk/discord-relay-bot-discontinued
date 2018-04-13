@@ -16,7 +16,7 @@ var linkMessage = function(msgId, serverId, parsedName) {
                 console.error("Unable to find participant: "+parsedName);
             } else {
                 contest.saveParticipantMsgId(db, row.discord_id, {id: msgId, guild: {id: serverId}});
-                console.log("Added msg "+msgId+" for "+row.id);
+                console.log("Added msg "+msgId+" for "+row.discord_id);
             }
         }
     );
