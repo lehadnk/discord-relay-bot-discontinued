@@ -54,7 +54,7 @@ exports.temporaryMessage = function(channel, text, lifespan) {
     response.then((m) => { m.delete(lifespan); });
 };
 
-exports.synchMessage = function(client, msg) {
+exports.synchMessage = function(client, msg, callback = null) {
     var embed = new Discord.RichEmbed()
         .setAuthor(getNickname(msg), getAvatar(msg))
         .setDescription(msg.content)
@@ -68,7 +68,11 @@ exports.synchMessage = function(client, msg) {
         if (guild.id !== msg.guild.id) {
             var channel = guild.channels.find('name', msg.channel.name);
             if (channel !== null) {
-                channel.sendEmbed(embed);
+                channel.send({embed}).then((m) => {
+                    if (callback !== null) {
+                        callback(m);
+                    }
+                })
             }
         }
     });

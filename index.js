@@ -20,7 +20,7 @@ var adminList = fs.readFileSync('admins.txt').toString().split("\n");
 var synchedChannels = [
     'cross-chat',
     'xmog-contest',
-    'xmog-contest-test',
+//    'xmog-contest-test',
     'cross-addons-ui',
 ];
 
@@ -84,6 +84,19 @@ client.on('message', msg => {
     }
         
     if (blacklist.indexOf(msg.author.id) > -1) return;
+    
+    if (msg.content.match(/^\/xmog-remove-participant .*$/)) {
+        if (!isAdmin(msg.author)) {
+            msg.channel.send("You're not permitted to do this, bitch");
+            return;
+        }
+        
+        try {
+            contest.removeParticipant(db, msg, client);
+        } catch(err) {
+            chatFunctions.temporaryMessage(msg.channel, err, 8000);
+        }
+    }
     
     if (msg.content.match(/^\/xmog-participants-list/)) {
         contest.getParticipantsList(db, msg);

@@ -1,14 +1,14 @@
 const chatFunctions = require('./chat-functions.js');
 
-parseName = function(charInfo) {
-    var charName = charInfo[0].trim().toLowerCase().replace(/ /g,'');
+var parseName = function(charInfo) {
+    var charName = charInfo.name.toLowerCase().replace(/ /g,'');
     if (charName.length > 12) {
         throw "Character name cannot be longer than 12 letters long";
     }
     if (charName.length < 2) {
         throw "Character name cannot be less than 2 letters long";
     }
-    var charRealm = charInfo[1].trim().toLowerCase().replace(/ /g,'');
+    var charRealm = charInfo.realm.trim().toLowerCase().replace(/ /g,'');
     if (charRealm.length < 5) {
         throw "Realm name cannot be less than 5 letters long";
     }
@@ -18,40 +18,75 @@ parseName = function(charInfo) {
     
     return charName+'-'+charRealm;
 }
+exports.parseName = parseName;
 
-exports.isXmogContestChannel = function(channel) {
-    return channel.name == 'xmog-contest';
+var nameStringToInfo = function(charInfoLine) {
+    var charInfo = charInfoLine.split('-');
+    if (charInfo.length < 2) {
+        return null;
+    }
+    
+    var charName = charInfo.splice(0, 1)[0].trim(' ');
+    var charRealm = charInfo.join('-').trim(' ');
+    return {name: charName, realm: charRealm};
 }
+
+var getCharInfoFromMsg = function(msgContent) {
+    var msgParameters = msgContent.split('\n');
+    if (msgParameters.length == 0) {
+        return null;
+    }
+    
+    var nameString = msgParameters[0];
+    
+    return nameStringToInfo(nameString);
+}
+exports.getCharInfoFromMsg = getCharInfoFromMsg;
+
+var getCharInfoFromParam = function(msg) {
+    var msgChunks = msg.content.split(' ');
+    if (msgChunks.length < 2) {
+        return null;
+    }
+    
+    msgChunks.splice(0, 1);
+    var nameString = msgChunks.join(' ');
+    
+    return nameStringToInfo(nameString);
+}
+exports.getCharInfo = getCharInfoFromParam;
+
+var isXmogContestChannel = function(channel) {
+    return channel.name == 'xmog-contest-test';
+}
+exports.isXmogContestChannel = isXmogContestChannel;
+
+var saveParticipantMsgId = function(db, participantDiscordId, serverId, msg) {
+    db.run("INSERT INTO participant_posts(participant_discord_id, discord_server_id, discord_message_id) VALUES (?1, ?2, ?3)", {
+          1: participantDiscordId,
+          2: serverId,
+          3: msg.id
+    });
+}
+exports.saveParticipantMsgId = saveParticipantMsgId;
 
 exports.participantAdd = function(client, db, msg) {
     if (typeof msg.attachments.first() === 'undefined') {
         msg.delete(1000);
         return;
     }
+    
     if (msg.content.length < 10) {
         msg.delete(1000);
         return;
     }
-    
-    var msgParameters = msg.content.split('\n');
-    if (msgParameters.length == 0) {
+
+    var charInfo = getCharInfoFromMsg(msg.content);
+    if (charInfo == null) {
         chatFunctions.temporaryMessage(msg.channel, "Please enter character name in corresponding format (Name - Realm)", 10000);
         msg.delete(1000);
         return;
     }
-    
-    var charInfoLine = msgParameters[0];
-    
-    var charInfoTmp = charInfoLine.split('-');
-    if (charInfoTmp.length < 2) {
-        chatFunctions.temporaryMessage(msg.channel, "Please enter character name in corresponding format (Name - Realm)", 10000);
-        msg.delete(1000);
-        return;
-    }
-    var charNameTmp = charInfoTmp.splice(0, 1)[0];
-    var charRealmTmp = charInfoTmp.join('-');
-    var charInfo = [charNameTmp, charRealmTmp];
-    
     var charName = parseName(charInfo);
     
     db.get(
@@ -68,11 +103,16 @@ exports.participantAdd = function(client, db, msg) {
                 db.run("INSERT INTO participants(discord_id, discord_server_id, name, parsed_name) VALUES (?1, ?2, ?3, ?4)", {
                       1: msg.author.id,
                       2: msg.guild.id,
-                      3: charInfoLine.trim('\n'),
+                      3: charInfo.name+" - "+charInfo.realm,
                       4: charName
                 });
-                chatFunctions.temporaryMessage(msg.channel, "New participant added: **"+charInfoLine+"**", 7000);
-                chatFunctions.synchMessage(client, msg);
+                chatFunctions.temporaryMessage(msg.channel, "New participant added: **"+charInfo.name+" - "+charInfo.realm+"**", 7000);
+                chatFunctions.synchMessage(
+                    client,
+                    msg,
+                    saveParticipantMsgId.bind(null, db, msg.author.id, msg.guild.id)
+                );
+                saveParticipantMsgId(db, msg.author.id, msg.guild.id, msg);
             }
         }
     );
@@ -95,8 +135,8 @@ exports.doVote = function(db, msg) {
     params.splice(0, 1);
     var unparsedName = params.join(' ');
     
-    var charInfo = unparsedName.split('-');
-    if (charInfo.length != 2) {
+    var charInfo = getCharInfoFromParam(msg);
+    if (charInfo.length == null) {
         chatFunctions.temporaryMessage(msg.channel, "Please enter character name in corresponding format (Name - Realm)", 7000);
         msg.delete(1000);
         return;
@@ -139,3 +179,34 @@ exports.doVote = function(db, msg) {
     
     msg.delete(1000);
 }
+
+//exports.removeParticipant = function(db, msg) {
+//    var params = msg.content.split(' ');
+//    
+//    if (params.length < 2) {
+//        throw "You're required to provide discord_id";
+//    }
+//    
+//    var discordId = params[1];
+//    
+//    db.get("SELECT * FROM participants WHERE discord_id = ?1", {1:discordId}, (err, row) => {
+//        if (typeof row === 'undefined') {
+//            chatFunctions.temporaryMessage(msg.channel, "No participant with discord_id found: "+discordId+". Are you sure that you're right with the spelling?", 10000);
+//            return;
+//        }
+//        
+//        client.guilds.forEach(function (guild) {
+//            channels.forEach(function (channel)) {
+//                if (isXmogContestChannel(channel)) {
+//                    channel.fetchMessages({limit: 100}).then(messages => {
+//                        
+//                    }
+//                }
+//            }
+//            var channel = guild.channels.find('xmog-contest', msg.channel.name);
+//            if (channel !== null) {
+//                channel.sendEmbed(embed);
+//            }
+//        });
+//    });
+//}
