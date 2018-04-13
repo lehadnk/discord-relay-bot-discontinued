@@ -104,11 +104,6 @@ client.on('message', msg => {
     }
     
     if (contest.isXmogContestChannel(msg.channel)) {
-        if (msg.author.id != 207169330549358592) {
-            msg.delete();
-            return;
-        }
-        
         try {
             contest.participantAdd(client, db, msg);
         } catch(err) {
