@@ -50,7 +50,7 @@ client.login(process.env.BOT_TOKEN).then(() => {
     client.guilds.forEach(function (guild) {
         console.log("Parsing "+guild.id);
         
-        var channel = guild.channels.find('name', 'xmog-contest-test');
+        var channel = guild.channels.find('name', 'xmog-contest');
         if (channel == null) {
             return;
         }
