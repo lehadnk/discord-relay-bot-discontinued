@@ -1,7 +1,7 @@
 const sqlite3 = require('sqlite3').verbose();
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const contest = require('./contest.js');
+const contest = require('../modules/contest.js');
 
 var db = new sqlite3.Database('database.db3');
 

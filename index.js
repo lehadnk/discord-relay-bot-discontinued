@@ -3,9 +3,9 @@ const Discord = require("discord.js");
 const client = new Discord.Client();
 const http = require('http');
 const sqlite3 = require('sqlite3').verbose();
-const contest = require('./contest.js');
-const chatFunctions = require('./chat-functions.js');
-const ban = require('./ban-system.js');
+const contest = require('./modules/contest.js');
+const chatFunctions = require('./modules/chat-functions.js');
+const ban = require('./modules/ban-system.js');
 
 http.createServer(function (req, res) {}).listen(process.env.PORT || 6000);
 var db = new sqlite3.Database('database.db3');
@@ -18,10 +18,10 @@ var fs = require('fs');
 var adminList = fs.readFileSync('admins.txt').toString().split("\n");
 
 var synchedChannels = [
-    'cross-chat',
-    'xmog-contest',
-//    'xmog-contest-test',
-    'cross-addons-ui',
+//    'cross-chat',
+//    'xmog-contest',
+    'xmog-contest-test',
+//    'cross-addons-ui',
 ];
 
 var isAdmin = function(user) {
@@ -85,27 +85,29 @@ client.on('message', msg => {
         
     if (blacklist.indexOf(msg.author.id) > -1) return;
     
-    if (msg.content.match(/^\/xmog-remove-participant .*$/)) {
-        if (!isAdmin(msg.author)) {
-            msg.channel.send("You're not permitted to do this, bitch");
-            return;
-        }
-        
-        try {
-            contest.removeParticipant(db, msg, client);
-        } catch(err) {
-            chatFunctions.temporaryMessage(msg.channel, err, 8000);
-        }
-    }
+    // if (msg.content.match(/^\/xmog-remove-participant .*$/)) {
+    //     if (!isAdmin(msg.author)) {
+    //         msg.channel.send("You're not permitted to do this, bitch");
+    //         return;
+    //     }
+    //
+    //     try {
+    //         contest.removeParticipant(db, msg, client);
+    //     } catch(err) {
+    //         chatFunctions.temporaryMessage(msg.channel, err, 8000);
+    //     }
+    // }
     
     if (msg.content.match(/^\/xmog-participants-list/)) {
         contest.getParticipantsList(db, msg);
     }
     
-    if (msg.content.match(/^\/vote .*$/) && contest.isXmogContestChannel(msg.channel)) { 
-        chatFunctions.temporaryMessage(msg.channel, "Голосование закрыто до 20ого апреля, 20:00 GMT+3.", 8000);
-        msg.delete();
-        return;
+    if (msg.content.match(/^\/vote .*$/) && contest.isXmogContestChannel(msg.channel)) {
+        if (Date.now() < 1524243600000) {
+            chatFunctions.temporaryMessage(msg.channel, "Голосование закрыто до 20ого апреля, 20:00 GMT+3.", 8000);
+            msg.delete();
+            return;
+        }
         
         try {
             contest.doVote(db, msg);
@@ -117,6 +119,10 @@ client.on('message', msg => {
     }
     
     if (contest.isXmogContestChannel(msg.channel)) {
+        if (msg.author.id == 207169330549358592) {
+            return;
+        }
+
         try {
             contest.participantAdd(client, db, msg);
         } catch(err) {

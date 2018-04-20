@@ -57,7 +57,7 @@ var getCharInfoFromParam = function(msg) {
 exports.getCharInfo = getCharInfoFromParam;
 
 var isXmogContestChannel = function(channel) {
-    return channel.name == 'xmog-contest';
+    return channel.name == 'xmog-contest-test';
 }
 exports.isXmogContestChannel = isXmogContestChannel;
 
@@ -134,9 +134,10 @@ exports.doVote = function(db, msg) {
     var params = msg.content.split(' ');
     params.splice(0, 1);
     var unparsedName = params.join(' ');
+
     
     var charInfo = getCharInfoFromParam(msg);
-    if (charInfo.length == null) {
+    if (charInfo.length == 0) {
         chatFunctions.temporaryMessage(msg.channel, "Please enter character name in corresponding format (Name - Realm)", 7000);
         msg.delete(1000);
         return;
