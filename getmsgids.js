@@ -38,11 +38,17 @@ var parseMessage = function(msg) {
         return;
     }
     
+    var parsedName = null;
     try {
-        var parsedName = contest.parseName(charInfo);
-        linkMessage(msgId, serverId, parsedName);
+        parsedName = contest.parseName(charInfo);
     } catch (err) {
+        console.log(msgContent+" will NOT be deleted")
         return;
+    }
+    
+    if (parsedName) {
+        console.log(msgContent+" will be deleted");
+        msg.delete();
     }
 }
 

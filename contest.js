@@ -204,7 +204,9 @@ exports.removeParticipant = function(db, msg, client) {
             var channel = guild.channels.find('name', 'xmog-contest');
             var message = channel.fetchMessages({around: row.discord_message_id, limit: 1}).then(messages => {
                 messages.forEach(msg => {
-                    msg.delete();
+                    if (msg.id == row.discord_message_id) {
+                        msg.delete();
+                    }
                 });
             });
         });
