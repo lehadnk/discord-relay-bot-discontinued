@@ -119,6 +119,7 @@ client.on('message', msg => {
     
     if (contest.isXmogContestChannel(msg.channel)) {
         if (msg.author.id == 207169330549358592) {
+            chatFunctions.synchMessage(client, msg);
             return;
         }
 
