@@ -120,13 +120,26 @@ exports.participantAdd = function(client, db, msg) {
 
 exports.getParticipantsList = function(db, msg) {
     var sql = "SELECT p.name, count(v.id) as cnt FROM participants p LEFT JOIN votes v ON p.id = v.participant_id GROUP BY p.name ORDER BY cnt DESC";
-        
+
+    var strings = [];
     db.all(sql, (err, rows) => {
-        var response = "**Participants list:**\n";
+        console.log(rows);
+        strings.push("**Participants list:**\n");
         rows.forEach((row) => {
-            response += row.name+" - "+row.cnt+"\n";
-        })
-        chatFunctions.temporaryMessage(msg.channel, response, 25000);
+            strings.push(row.name+" - "+row.cnt+"\n");
+        });
+        //chatFunctions.temporaryMessage(msg.channel, response, 25000);
+
+        var i, j, temparray, chunk = 30;
+        for (i = 0, j = strings.length; i<j; i+=chunk) {
+            temparray = strings.slice(i, i+chunk);
+
+            var string = "";
+            temparray.forEach(function(elem) {
+                string += elem;
+            });
+            chatFunctions.temporaryMessage(msg.channel, string, 25000);
+        }
     });
 }
 
