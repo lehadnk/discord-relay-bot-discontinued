@@ -7,9 +7,9 @@ var db = new sqlite3.Database('../../database.db3');
 
 var loadVotersList = function(db) {
     var voters = [];
-    db.all("SELECT id, discord_id FROM votes", (err, rows) => {
+    db.all("SELECT id, discord_id, discord_name FROM votes WHERE id", (err, rows) => {
         rows.forEach((row) => {
-            participants.push({id: row.id, discord_id: row.discord_id});
+            participants.push(row);
         });
     });
     return voters;
@@ -41,6 +41,10 @@ function getNickname(member) {
 
 client.login(process.env.BOT_TOKEN).then(() => {
     participants.forEach((participant) => {
+        if (isNaN(participant.discord_name)) {
+            return;
+        }
+        
         let member = getMemberInfo(participant.discord_id);
 
         let name = member != null ? getNickname(member) : participant.discord_id;
