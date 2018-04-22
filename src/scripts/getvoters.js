@@ -54,4 +54,5 @@ client.login(process.env.BOT_TOKEN).then(() => {
             2: participant.id
         });
     });
+    client.destroy();
 });
