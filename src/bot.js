@@ -1,21 +1,19 @@
 "use strict";
 const Discord = require("discord.js");
 const client = new Discord.Client();
-const http = require('http');
 const sqlite3 = require('sqlite3').verbose();
 const contest = require('./modules/contest.js');
 const chatFunctions = require('./modules/chat-functions.js');
 const ban = require('./modules/ban-system.js');
 
-http.createServer(function (req, res) {}).listen(process.env.PORT || 6000);
-var db = new sqlite3.Database('database.db3');
+var db = new sqlite3.Database('../database.db3');
 
 // Loading blacklist
 var blacklist = ban.loadBanList(db);
 
 // Loading admin list
 var fs = require('fs');
-var adminList = fs.readFileSync('admins.txt').toString().split("\n");
+var adminList = fs.readFileSync('../admins.txt').toString().split("\n");
 
 var synchedChannels = [
    'cross-chat',

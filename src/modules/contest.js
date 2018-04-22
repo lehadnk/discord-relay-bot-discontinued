@@ -128,7 +128,6 @@ exports.getParticipantsList = function(db, msg) {
         rows.forEach((row) => {
             strings.push(row.name+" - "+row.cnt+"\n");
         });
-        //chatFunctions.temporaryMessage(msg.channel, response, 25000);
 
         var i, j, temparray, chunk = 30;
         for (i = 0, j = strings.length; i<j; i+=chunk) {
@@ -181,9 +180,11 @@ exports.doVote = function(db, msg) {
                         if (row.cnt > 0) {
                             chatFunctions.temporaryMessage(msg.channel, "Sorry, "+chatFunctions.getNickname(msg)+", you already voted for "+unparsedName+"!", 10000);
                         } else {
-                            db.run("INSERT INTO votes(discord_id, participant_id) VALUES (?1, ?2)", {
+                            db.run("INSERT INTO votes(discord_id, participant_id, discord_server_id, discord_name) VALUES (?1, ?2, ?3, ?4)", {
                                   1: msg.author.id,
-                                  2: participant_id
+                                  2: participant_id,
+                                  3: msg.guild.id,
+                                  4: chatFunctions.getNickname(msg)
                             });
                             chatFunctions.temporaryMessage(msg.channel, "Alright, your vote counted, "+chatFunctions.getNickname(msg), 8000);
                         }
