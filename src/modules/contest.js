@@ -148,8 +148,15 @@ exports.doVote = function(db, msg) {
     params.splice(0, 1);
     var unparsedName = params.join(' ');
 
-    
-    var charInfo = getCharInfoFromParam(msg);
+    var charInfo = {};
+    try {
+        charInfo = getCharInfoFromParam(msg);
+    } catch (err) {
+        chatFunctions.temporaryMessage(msg.channel, err, 7000);
+        msg.delete(1000);
+        return;
+    }
+
     if (charInfo.length == 0) {
         chatFunctions.temporaryMessage(msg.channel, "Please enter character name in corresponding format (Name - Realm)", 7000);
         msg.delete(1000);
