@@ -100,11 +100,12 @@ exports.participantAdd = function(client, db, msg) {
                 msg.delete(1000);
                 return false;
             } else {
-                db.run("INSERT INTO participants(discord_id, discord_server_id, name, parsed_name) VALUES (?1, ?2, ?3, ?4)", {
+                db.run("INSERT INTO participants(discord_id, discord_server_id, name, parsed_name, image_url) VALUES (?1, ?2, ?3, ?4, ?5)", {
                       1: msg.author.id,
                       2: msg.guild.id,
                       3: charInfo.name+" - "+charInfo.realm,
-                      4: charName
+                      4: charName,
+                      5: msg.attachments.first().url
                 });
                 chatFunctions.temporaryMessage(msg.channel, "New participant added: **"+charInfo.name+" - "+charInfo.realm+"**", 7000);
                 chatFunctions.synchMessage(
