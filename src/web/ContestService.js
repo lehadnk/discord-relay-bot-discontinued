@@ -22,7 +22,13 @@ class ContestService {
                 function shuffle(a) {
                     var j, x, i;
                     for (i = a.length - 1; i > 0; i--) {
-                        j = Math.floor(Math.random() * (i + 1));
+                        let d = new Date();
+                        let j = Math.floor(d.getMinutes().toString()[1] / 2);
+                        // console.log(j);
+                        // //let
+
+                        // j = Math.floor(Math.random() * (i + 1));
+                        //console.log(j);
                         x = a[i];
                         a[i] = a[j];
                         a[j] = x;
