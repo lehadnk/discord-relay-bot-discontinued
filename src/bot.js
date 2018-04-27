@@ -123,6 +123,10 @@ client.on('message', msg => {
             return;
         }
 
+        chatFunctions.temporaryMessage(msg.channel, "Конкурс закончился. Прием скриншотов закрыт. Но мы еще вернемся!", 15000);
+        msg.delete();
+        return;
+
         try {
             contest.participantAdd(client, db, msg);
         } catch(err) {
