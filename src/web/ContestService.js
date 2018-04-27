@@ -23,7 +23,7 @@ class ContestService {
                     var j, x, i;
                     for (i = a.length - 1; i > 0; i--) {
                         let d = new Date();
-                        let j = Math.floor(d.getMinutes().toString()[1] / 2);
+                        let j = Math.floor(Math.abs((d.getMinutes() - 30) / 7.5));
                         // console.log(j);
                         // //let
 
@@ -36,7 +36,7 @@ class ContestService {
                     return a;
                 }
 
-                let leaders = result.splice(0, 5);
+                let leaders = result.splice(0, 3);
                 let leadersShuffled = shuffle(leaders);
 
                 leadersShuffled.forEach((l) => {
