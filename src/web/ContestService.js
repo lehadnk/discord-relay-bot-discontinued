@@ -47,15 +47,15 @@ class ContestService {
             });
     }
 
-    // getParticipant(participantId, callback) {
-    //     this.db.all("SELECT *\n" +
-    //         "FROM votes\n" +
-    //         "WHERE participant_id = ?1",
-    //         {1: participantId},
-    //         (err, rows) => {
-    //             callback(rows);
-    //         });
-    // }
+    getParticipant(participantId, callback) {
+        this.db.all("SELECT *\n" +
+            "FROM votes\n" +
+            "WHERE participant_id = ?1",
+            {1: participantId},
+            (err, rows) => {
+                callback(rows);
+            });
+    }
 
     getVotersList(callback) {
         this.db.all("SELECT discord_id, discord_name, count(id) as votes\n" +
