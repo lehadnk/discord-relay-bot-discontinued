@@ -8,42 +8,9 @@ class ContestService {
             "FROM participants p\n" +
             "LEFT JOIN votes v ON p.id = v.participant_id\n" +
             "GROUP BY p.id\n" +
-            "ORDER BY votes DESC",
+            "ORDER BY votes DESC, p.name ASC",
             (err, rows) => {
-                let result = [];
-                rows.forEach((r) => {
-                    result.push({
-                        id: r.id,
-                        name: r.name,
-                        image_url: r.image_url
-                    });
-                });
-
-                function shuffle(a) {
-                    var j, x, i;
-                    for (i = a.length - 1; i > 0; i--) {
-                        let d = new Date();
-                        let j = Math.floor(Math.abs((d.getMinutes() - 30) / 7.5));
-                        // console.log(j);
-                        // //let
-
-                        // j = Math.floor(Math.random() * (i + 1));
-                        //console.log(j);
-                        x = a[i];
-                        a[i] = a[j];
-                        a[j] = x;
-                    }
-                    return a;
-                }
-
-                let leaders = result.splice(0, 3);
-                let leadersShuffled = shuffle(leaders);
-
-                leadersShuffled.forEach((l) => {
-                    result.unshift(l);
-                });
-
-                callback(result);
+                callback(rows);
             });
     }
 

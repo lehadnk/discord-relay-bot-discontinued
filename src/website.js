@@ -57,30 +57,30 @@ http.createServer(function (req, res) {
             return service.getParticipantsList((result) => {
                 jsonSuccessResponse(res, result);
             });
-        // case 'participant':
-        //     if (urlChunks.length < 3) {
-        //         return badRequestError();
-        //     }
-        //
-        //     let participantId = urlChunks[2];
-        //
-        //     return service.getParticipant(participantId, (result) => {
-        //         jsonSuccessResponse(res, result);
-        //     });
-        // case 'voters':
-        //     return service.getVotersList((result) => {
-        //         jsonSuccessResponse(res, result);
-        //     });
-        // case 'voter':
-        //     if (urlChunks.length < 3) {
-        //         return badRequestError();
-        //     }
-        //
-        //     let voterId = urlChunks[2];
-        //
-        //     return service.getVoter(voterId, (result) => {
-        //         jsonSuccessResponse(res, result);
-        //     });
+        case 'participant':
+            if (urlChunks.length < 3) {
+                return badRequestError();
+            }
+
+            let participantId = urlChunks[2];
+
+            return service.getParticipant(participantId, (result) => {
+                jsonSuccessResponse(res, result);
+            });
+        case 'voters':
+            return service.getVotersList((result) => {
+                jsonSuccessResponse(res, result);
+            });
+        case 'voter':
+            if (urlChunks.length < 3) {
+                return badRequestError();
+            }
+
+            let voterId = urlChunks[2];
+
+            return service.getVoter(voterId, (result) => {
+                jsonSuccessResponse(res, result);
+            });
     }
 
     notFoundError(res);
