@@ -100,8 +100,8 @@ client.on('message', msg => {
     }
     
     if (msg.content.match(/^\/vote .*$/) && contest.isXmogContestChannel(msg.channel)) {
-        if (Date.now() < 1524243600000) {
-            chatFunctions.temporaryMessage(msg.channel, "Голосование закрыто до 20ого апреля, 20:00 GMT+3.", 8000);
+        if (Date.now() > 1524852000000) {
+            chatFunctions.temporaryMessage(msg.channel, "Голосование закрыто после 27ого апреля, 21:00 GMT+3.", 8000);
             msg.delete();
             return;
         }
@@ -116,7 +116,7 @@ client.on('message', msg => {
     }
     
     if (contest.isXmogContestChannel(msg.channel)) {
-        if (msg.author.id == 207169330549358592) {
+        if (msg.author.id == 207169330549358592 || msg.author.id == 209029118141005824) {
             chatFunctions.synchMessage(client, msg);
             return;
         }
