@@ -100,18 +100,20 @@ client.on('message', msg => {
     }
     
     if (msg.content.match(/^\/vote .*$/) && contest.isXmogContestChannel(msg.channel)) {
+        chatFunctions.temporaryMessage(msg.channel, "Голосование закрыто после 27ого апреля, 21:00 GMT+3.", 8000);
+        msg.delete();
+        return;
         if (Date.now() > 1524852000000) {
-            chatFunctions.temporaryMessage(msg.channel, "Голосование закрыто после 27ого апреля, 21:00 GMT+3.", 8000);
             msg.delete();
             return;
         }
-        
+
         try {
             contest.doVote(db, msg);
         } catch(err) {
             chatFunctions.temporaryMessage(msg.channel, err, 8000);
         }
-        
+
         return;
     }
     
