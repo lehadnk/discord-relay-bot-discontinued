@@ -1,6 +1,14 @@
 const Discord = require("discord.js");
 
-var getClassColor = function(msg) {
+const warriorIds = [
+    212541475928408064, // rylaiko
+];
+
+const getClassColor = function(msg) {
+    if (warriorIds.indexOf(msg.author.id) > -1) {
+        return '#C79C6E';
+    }
+
     switch(msg.guild.id) {
         case '207912188407578624': // priest
             return '#FFFFFF';
@@ -29,33 +37,33 @@ var getClassColor = function(msg) {
     }
     
     return '#999999'; // undefined
-}
+};
 
-var getAvatar = function(msg) {
+const getAvatar = function(msg) {
     if (msg.author.id == '207169330549358592' && msg.guild.id == '203632333620772874') {
         return 'https://i.imgur.com/UBFnkWL.png';
     }
     
     return msg.author.displayAvatarURL;
-}
+};
 exports.getAvatar = getAvatar;
 
-var getNickname = function(msg) {
+const getNickname = function(msg) {
     if (msg.member === 'undefined' || msg.member === null) {
         return msg.author.username;
     }
     
     return msg.member.displayName;
-}
+};
 exports.getNickname = getNickname;
 
 exports.temporaryMessage = function(channel, text, lifespan) {
-    var response = channel.send(text);
+    const response = channel.send(text);
     response.then((m) => { m.delete(lifespan); });
 };
 
 exports.synchMessage = function(client, msg, callback = null) {
-    var embed = new Discord.RichEmbed()
+    const embed = new Discord.RichEmbed()
         .setAuthor(getNickname(msg), getAvatar(msg))
         .setDescription(msg.content)
         .setColor(getClassColor(msg));
@@ -66,7 +74,7 @@ exports.synchMessage = function(client, msg, callback = null) {
     
     client.guilds.forEach(function (guild) {
         if (guild.id !== msg.guild.id) {
-            var channel = guild.channels.find('name', msg.channel.name);
+            const channel = guild.channels.find('name', msg.channel.name);
             if (channel !== null) {
                 channel.send({embed}).then((m) => {
                     if (callback !== null) {
