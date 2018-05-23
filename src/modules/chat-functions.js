@@ -1,7 +1,7 @@
 const Discord = require("discord.js");
 
 const warriorIds = [
-    212541475928408064, // rylaiko
+    '212541475928408064', // rylaiko
 ];
 
 const getClassColor = function(msg) {
