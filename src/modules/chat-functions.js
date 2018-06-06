@@ -18,6 +18,8 @@ const getClassColor = function(msg) {
             return '#FFF569';
         case '217529109272592384': // dk
             return '#C41F3B';
+        case '452908426276634634': // new dk
+            return '#C41F3B';
         case '203632333620772874': // druid
             return '#FF7D0A';
         case '215427955193544704': // hunter
