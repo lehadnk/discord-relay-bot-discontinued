@@ -34,6 +34,12 @@ client.on('message', msg => {
         msg.delete(50);
         return;
     }
+
+    if (msg.content.match(/^!пингстори$/)) {
+        chatFunctions.temporaryMessage(msg.channel, "<@213326376466382849>", 300);
+        msg.delete(50);
+        return;
+    }
     
     if (msg.content.match(/^\/crossban .*$/)) {
         if (!isAdmin(msg.author)) {
