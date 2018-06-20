@@ -56,7 +56,7 @@ exports.run = async function(db, msg) {
 }
 
 exports.stat = function(db, msg) {
-    var sql = "SELECT name, score FROM pidorgame ORDER BY score DESC LIMIT 10";
+    var sql = "SELECT name, score FROM pidorgame WHERE score > 0 ORDER BY score DESC LIMIT 10";
 
     var strings = [];
     db.all(sql, (err, rows) => {
