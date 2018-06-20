@@ -30,8 +30,8 @@ client.on('message', msg => {
     if (msg.author.bot == true) return;
 
     if (msg.content.match(/^!пингфабулоса$/)) {
-        msg.delete();
         chatFunctions.temporaryMessage(msg.channel, "<@245197225943236619>", 300);
+        msg.delete(50);
         return;
     }
     
