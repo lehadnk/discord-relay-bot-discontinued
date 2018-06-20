@@ -29,17 +29,17 @@ client.on('message', msg => {
     if (client.user.id === msg.author.id) return;
     if (msg.author.bot == true) return;
 
-    if (msg.content.match(/^!пингфабулоса$/)) {
-        chatFunctions.temporaryMessage(msg.channel, "<@245197225943236619>", 300);
-        msg.delete(50);
-        return;
-    }
-
-    if (msg.content.match(/^!пингстори$/)) {
-        chatFunctions.temporaryMessage(msg.channel, "<@213326376466382849>", 300);
-        msg.delete(50);
-        return;
-    }
+    // if (msg.content.match(/^!пингфабулоса$/)) {
+    //     chatFunctions.temporaryMessage(msg.channel, "<@245197225943236619>", 300);
+    //     msg.delete(50);
+    //     return;
+    // }
+    //
+    // if (msg.content.match(/^!пингстори$/)) {
+    //     chatFunctions.temporaryMessage(msg.channel, "<@213326376466382849>", 300);
+    //     msg.delete(50);
+    //     return;
+    // }
     
     if (msg.content.match(/^\/crossban .*$/)) {
         if (!isAdmin(msg.author)) {
