@@ -28,6 +28,12 @@ var isAdmin = function(user) {
 client.on('message', msg => {    
     if (client.user.id === msg.author.id) return;
     if (msg.author.bot == true) return;
+
+    if (msg.content.match(/^!пингфабулоса$/)) {
+        msg.delete();
+        chatFunctions.temporaryMessage(msg.channel, "<@245197225943236619>", 300);
+        return;
+    }
     
     if (msg.content.match(/^\/crossban .*$/)) {
         if (!isAdmin(msg.author)) {
