@@ -46,6 +46,12 @@ client.on('message', msg => {
         return;
     }
 
+    if (msg.content.match(/^!топпидоров/)) {
+        pidorGame.stat(db, msg);
+        msg.delete(1000);
+        return;
+    }
+
     if (msg.content.match(/^!пингфабулоса$/)) {
         if (!isAdmin(msg.author)) {
             msg.channel.send("Фабулос, <@" + msg.author.id + "> were trying to ping you!");

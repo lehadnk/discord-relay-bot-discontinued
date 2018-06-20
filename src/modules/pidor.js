@@ -35,7 +35,7 @@ exports.run = async function(db, msg) {
     await sleep(7000);
 
     db.all(
-        "SELECT id, name FROM pidorgame",
+        "SELECT id, discord_id, name FROM pidorgame",
         (err, rows) => {
             if (typeof rows === 'undefined') {
                 chatFunctions.temporaryMessage(msg.channel, "Something is sick and wrong with me: " + err);
@@ -45,7 +45,7 @@ exports.run = async function(db, msg) {
                 return false;
             } else {
                 let player = rows[Math.floor(Math.random() * rows.length)];
-                msg.channel.send("А вот и пидор - **" + player.name + "**");
+                msg.channel.send("А вот и пидор - <@" + player.discord_id + ">");
 
                 db.run("UPDATE pidorgame SET score = score + 1 WHERE id = ?1", {
                     1: player.id,
@@ -53,7 +53,28 @@ exports.run = async function(db, msg) {
             }
         }
     );
+}
 
+exports.stat = function(db, msg) {
+    var sql = "SELECT name, score as cnt FROM pidorgame ORDER BY score DESC LIMIT 10";
 
+    var strings = [];
+    db.all(sql, (err, rows) => {
+        console.log(rows);
+        strings.push("**Топ-10 пидоров за все время:**\n");
+        rows.forEach((row) => {
+            strings.push(row.name+" - "+row.score+"\n");
+        });
 
+        var i, j, temparray, chunk = 30;
+        for (i = 0, j = strings.length; i<j; i+=chunk) {
+            temparray = strings.slice(i, i+chunk);
+
+            var string = "";
+            temparray.forEach(function(elem) {
+                string += elem;
+            });
+            chatFunctions.temporaryMessage(msg.channel, string, 25000);
+        }
+    });
 }
