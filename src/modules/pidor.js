@@ -4,7 +4,7 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-exports.register = new function(db, msg) {
+exports.register = function(db, msg) {
     db.get(
         "SELECT count(id) as cnt FROM pidorgame WHERE discord_id = ?1",
         {
@@ -26,7 +26,7 @@ exports.register = new function(db, msg) {
     );
 };
 
-exports.run = new async function(db, msg) {
+exports.run = async function(db, msg) {
     msg.channel.send("Woob-woob, that's da sound of da pidor-police!");
     await sleep(2000);
     msg.channel.send("Выезжаю на место...");
