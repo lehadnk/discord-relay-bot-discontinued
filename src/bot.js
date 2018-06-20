@@ -5,6 +5,7 @@ const sqlite3 = require('sqlite3').verbose();
 const contest = require('./modules/contest.js');
 const chatFunctions = require('./modules/chat-functions.js');
 const ban = require('./modules/ban-system.js');
+const pidorGame = require('./modules/pidor.js');
 
 var db = new sqlite3.Database('../database.db3');
 
@@ -27,7 +28,23 @@ var isAdmin = function(user) {
 
 client.on('message', msg => {    
     if (client.user.id === msg.author.id) return;
-    if (msg.author.bot == true) return;
+    if (msg.author.bot === true) return;
+
+    if (msg.content.match(/^!пидордня/)) {
+        pidorGame.register(db, msg);
+        msg.delete(2000);
+        return;
+    }
+
+    if (msg.content.match(/^!ктопидор/)) {
+        if (!isAdmin(msg.author)) {
+            msg.channel.send("Ты");
+            return;
+        }
+        pidorGame.run(db, msg);
+        msg.delete(1000);
+        return;
+    }
 
     if (msg.content.match(/^!пингфабулоса$/)) {
         if (!isAdmin(msg.author)) {
