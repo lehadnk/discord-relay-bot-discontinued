@@ -35,12 +35,13 @@ exports.run = async function(db, msg) {
     await sleep(7000);
 
     db.all(
-        "SELECT id, name FROM pidorgame ORDER ",
+        "SELECT id, name FROM pidorgame",
         {
             1: msg.author.id
         },
         (err, rows) => {
             if (rows.length === 0) {
+
                 chatFunctions.temporaryMessage(msg.channel, "You can't run the game with no participants!", 9000);
                 return false;
             } else {
