@@ -36,10 +36,10 @@ exports.run = async function(db, msg) {
 
     db.all(
         "SELECT id, name FROM pidorgame",
-        {
-            1: msg.author.id
-        },
         (err, rows) => {
+            if (typeof rows === 'undefined') {
+                chatFunctions.temporaryMessage(msg.channel, "Something is sick and wrong with me: " + err);
+            }
             if (typeof rows === 'undefined') {
                 chatFunctions.temporaryMessage(msg.channel, "You can't run the game with no participants!", 9000);
                 return false;
