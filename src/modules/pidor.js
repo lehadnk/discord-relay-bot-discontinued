@@ -40,8 +40,7 @@ exports.run = async function(db, msg) {
             1: msg.author.id
         },
         (err, rows) => {
-            if (rows.length === 0) {
-
+            if (typeof rows === 'undefined') {
                 chatFunctions.temporaryMessage(msg.channel, "You can't run the game with no participants!", 9000);
                 return false;
             } else {
