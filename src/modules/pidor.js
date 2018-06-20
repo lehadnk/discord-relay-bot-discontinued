@@ -44,9 +44,7 @@ exports.run = async function(db, msg) {
                 chatFunctions.temporaryMessage(msg.channel, "You can't run the game with no participants!", 9000);
                 return false;
             } else {
-                console.log(rows);
                 let player = rows[Math.floor(Math.random() * rows.length)];
-                console.log(player);
                 msg.channel.send("А вот и пидор - **" + player.name + "**");
 
                 db.run("UPDATE pidorgame SET score = score + 1 WHERE id = ?1", {
