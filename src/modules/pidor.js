@@ -87,7 +87,7 @@ exports.run = async function(db, msg) {
         await sleep(2500);
     });
 
-    await sleep(5500);
+    await sleep(10500);
 
     db.all(
         "SELECT id, discord_id, name FROM pidorgame",
