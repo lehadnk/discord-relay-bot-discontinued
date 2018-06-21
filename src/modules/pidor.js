@@ -4,6 +4,60 @@ function sleep(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
+const prePhrases = [
+    [
+        'Woob-woob, that\'s da sound of da pidor-police!',
+        'Выезжаю на место...',
+        'Но кто же он?'
+    ],
+    [
+        'Woob-woob, that\'s da sound of da pidor-police!',
+        'Ведётся поиск в базе данных',
+        'Ведётся захват подозреваемого...'
+    ],
+    [
+        'Что тут у нас?',
+        'А могли бы на работе делом заниматься...',
+        'Проверяю данные...'
+    ],
+    [
+        'Инициирую поиск пидора дня...',
+        'Машины выехали',
+        'Так-так, что же тут у нас...',
+    ],
+    [
+        'Что тут у нас?',
+        'Военный спутник запущен, коды доступа внутри...',
+        'Не может быть!',
+    ]
+];
+
+const resultPhrases = [
+    'А вот и пидор - ',
+    'Вот ты и пидор, ',
+    'Ну ты и пидор, ',
+    'Сегодня ты пидор, ',
+    'Анализ завершен, сегодня ты пидор, ',
+    'ВЖУХ И ТЫ ПИДОР, ',
+    'Пидор дня обыкновенный, 1шт. - ',
+    'Стоять! Не двигаться! Вы объявлены пидором дня, ',
+    'И прекрасный человек дня сегодня... а нет, ошибка, всего-лишь пидор - ',
+];
+
+var getRandomElement = function(array) {
+    return array[Math.floor(Math.random() * array.length)];
+}
+
+async function asyncForEach(array, callback) {
+    for (let index = 0; index < array.length; index++) {
+        await callback(array[index], index, array)
+    }
+}
+
+exports.canStartGame = function(author) {
+    return author.id === '207169330549358592';
+}
+
 exports.register = function(db, msg) {
     db.get(
         "SELECT count(id) as cnt FROM pidorgame WHERE discord_id = ?1",
@@ -27,12 +81,13 @@ exports.register = function(db, msg) {
 };
 
 exports.run = async function(db, msg) {
-    msg.channel.send("Woob-woob, that's da sound of da pidor-police!");
-    await sleep(2000);
-    msg.channel.send("Выезжаю на место...");
-    await sleep(3000);
-    msg.channel.send("Но кто же он?");
-    await sleep(7000);
+    var phrases = getRandomElement(prePhrases);
+    asyncForEach(phrases, async (phrase) => {
+        msg.channel.send(phrase);
+        await sleep(2500);
+    });
+
+    await sleep(5500);
 
     db.all(
         "SELECT id, discord_id, name FROM pidorgame",
@@ -44,8 +99,9 @@ exports.run = async function(db, msg) {
                 chatFunctions.temporaryMessage(msg.channel, "You can't run the game with no participants!", 9000);
                 return false;
             } else {
-                let player = rows[Math.floor(Math.random() * rows.length)];
-                msg.channel.send("А вот и пидор - <@" + player.discord_id + ">");
+                let player = getRandomElement(rows);
+                let phrase = getRandomElement(resultPhrases);
+                msg.channel.send(phrase + "<@" + player.discord_id + ">");
 
                 db.run("UPDATE pidorgame SET score = score + 1 WHERE id = ?1", {
                     1: player.id,

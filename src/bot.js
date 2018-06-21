@@ -37,7 +37,7 @@ client.on('message', msg => {
     }
 
     if (msg.content.match(/^!ктопидор/)) {
-        if (!isAdmin(msg.author)) {
+        if (!pidorGame.canStartGame(msg.author)) {
             msg.channel.send("Ты");
             return;
         }
