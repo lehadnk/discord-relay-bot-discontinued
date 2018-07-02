@@ -81,7 +81,7 @@ exports.register = function(db, msg) {
 };
 
 exports.run = async function(db, msg) {
-    var phrases = getRandomElement(prePhrases);
+    let phrases = getRandomElement(prePhrases);
     asyncForEach(phrases, async (phrase) => {
         msg.channel.send(phrase);
         await sleep(2500);

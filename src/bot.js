@@ -30,27 +30,27 @@ client.on('message', msg => {
     if (client.user.id === msg.author.id) return;
     if (msg.author.bot === true) return;
 
-    if (msg.content.match(/^!пидордня/)) {
-        pidorGame.register(db, msg);
-        msg.delete(2000);
-        return;
-    }
-
-    if (msg.content.match(/^!ктопидор/)) {
-        if (!pidorGame.canStartGame(msg.author)) {
-            msg.channel.send("Ты");
-            return;
-        }
-        pidorGame.run(db, msg);
-        msg.delete(1000);
-        return;
-    }
-
-    if (msg.content.match(/^!топпидоров/)) {
-        pidorGame.stat(db, msg);
-        msg.delete(1000);
-        return;
-    }
+    // if (msg.content.match(/^!пидордня/)) {
+    //     pidorGame.register(db, msg);
+    //     msg.delete(2000);
+    //     return;
+    // }
+    //
+    // if (msg.content.match(/^!ктопидор/)) {
+    //     if (!pidorGame.canStartGame(msg.author)) {
+    //         msg.channel.send("Ты");
+    //         return;
+    //     }
+    //     pidorGame.run(db, msg);
+    //     msg.delete(1000);
+    //     return;
+    // }
+    //
+    // if (msg.content.match(/^!топпидоров/)) {
+    //     pidorGame.stat(db, msg);
+    //     msg.delete(1000);
+    //     return;
+    // }
 
     if (msg.content.match(/^!пингфабулоса$/)) {
         if (!isAdmin(msg.author)) {
